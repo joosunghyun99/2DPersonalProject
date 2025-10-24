@@ -10,5 +10,6 @@ public class CharacterData : ScriptableObject
     public int charID;
     public int charHP;
     public int charJumpCount;
+    public float charJumpPower;
     public float charMagnetRadius;
 }
