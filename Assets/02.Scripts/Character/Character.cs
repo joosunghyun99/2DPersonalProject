@@ -1,51 +1,64 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Character : MonoBehaviour
 {
+    public enum State { Run, Slide, Jump, Hit }
+
     public CharacterData characterData;
+    private StateMachine stateMachine;
+    private State currentState;
 
     private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
 
-    private BaseState currentState;
-
     [Header("GroundCheck")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    [SerializeField] private LayerMask groundLayer;
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
 
-    private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
-    private CapsuleCollider2D capsuleCollider;
-    private Animator anim;
+    public Rigidbody2D rb;
+    public SpriteRenderer spriteRenderer;
+    public CapsuleCollider2D capsuleCollider;
+    public Animator anim;
 
     [Header("Parameter")]
-    [SerializeField] private int maxHp;
-    [SerializeField] private int curHp;
-    [SerializeField] private int jumpCount;
-    [SerializeField] private float jumpPower;
-    [SerializeField] private float magnetRadius;
+    public int maxHp;
+    public int curHp;
+    public int jumpCount;
+    public float jumpPower;
+    public float magnetRadius;
 
-    private bool isGrounded;
-    private bool jumpRequested;
+    public bool isGrounded;
+    public bool jumpRequested;
+    public bool isInvincible;
 
     private void Awake()
     {
-        AddState("Run", new RunState());
-        AddState("Jump", new JumpState());
-        AddState("Slide", new SlideState());
-        AddState("Hit", new HitState());
+        if (characterData == null) 
+        {
+            Debug.Log("CharacterData null");
+            return;
+        }
 
         maxHp = characterData.charHP;
         curHp = maxHp;
         jumpCount = characterData.charJumpCount;
         jumpPower = characterData.charJumpPower;
         magnetRadius = characterData.charMagnetRadius;
+        isInvincible = false;
+
+        stateMachine = gameObject.AddComponent<StateMachine>();
+        stateMachine.AddState(State.Run, new RunState(this));
+        stateMachine.AddState(State.Jump, new JumpState(this));
+        stateMachine.AddState(State.Slide, new SlideState(this));
+        stateMachine.AddState(State.Hit, new HitState(this));
+        stateMachine.InitState(State.Run);
 
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = rb.GetComponent<SpriteRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
@@ -53,53 +66,36 @@ public class Character : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentState.Enter();
+
     }
 
     // Update is called once per frame
     void Update()
     {
         
-        currentState.Update();
-        
-        currentState.Transition();
+
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    jumpRequested = true;
-        //}
-
-        //if (Input.GetKeyDown(KeyCode.S)) 
-        //{
-        //    Slide();
-        //}
-
-        //if (Input.GetKeyUp(KeyCode.S)) 
-        //{
-        //    ExitSlide();
-        //}
     }
+
     private void LateUpdate()
     {
-        currentState.LateUpdate();
+
     }
+
     private void FixedUpdate()
     {
-        currentState.FixedUpdate();
+        if (jumpRequested && jumpCount > 0)
+        {
+            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            jumpCount--;
+        }
+        jumpRequested = false;
 
-        //if (jumpRequested && jumpCount > 0)
-        //{
-        //    rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-        //    jumpCount--;
-        //}
-        //jumpRequested = false;
-
-        //if (isGrounded && rb.velocity.y <= 0.05f)
-        //{
-        //    jumpCount = characterData.charJumpCount;
-        //}
+        if (isGrounded && rb.velocity.y <= 0.05f)
+        {
+            jumpCount = characterData.charJumpCount;
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -108,48 +104,156 @@ public class Character : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 
-    private void Slide() 
+    IEnumerator BlinkCo(float duration)
     {
-        transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
-        capsuleCollider.direction = CapsuleDirection2D.Horizontal;
+        float timer = 0.0f;
+
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
+
+        while (timer < duration)
+        {
+            spriteRenderer.color = new Color(1f, 0f, 0f, 1f);
+            yield return new WaitForSeconds(0.2f);
+            spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+            yield return new WaitForSeconds(0.2f);
+
+            timer += 0.4f;
+        }
+
+        isInvincible = false;
+
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), false);
     }
 
-    private void ExitSlide()
+    private class RunState : BaseState
     {
-        transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        capsuleCollider.direction = CapsuleDirection2D.Vertical;
+        public RunState(Character owner) : base(owner) { }
+
+        public override void Enter()
+        {
+            Debug.Log("Run");
+        }
+
+        public override void Transition()
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            {
+                owner.jumpCount--;
+                ChangeState(State.Jump);
+            }
+
+            if (Input.GetKeyDown(KeyCode.S)) 
+            {
+                ChangeState(State.Slide);
+            }
+        }
+
+        public void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
+            {
+                ChangeState(State.Hit);
+            }
+        }
     }
 
-    public void InitState(string stateName)
+    private class JumpState : BaseState
     {
-        currentState = stateDic[stateName];
+        public JumpState(Character owner) : base(owner) { }
+
+        public override void Enter()
+        {
+            Debug.Log("Jump");
+            owner.rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+        }
+
+        public override void Transition()
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            {
+                owner.jumpCount--;
+                ChangeState(State.Jump);
+            }
+
+            if (isGrounded && rb.velocity.y <= 0.05f)
+            {
+                ChangeState(State.Run);
+            }
+        }
+
+        public void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
+            {
+                ChangeState(State.Hit);
+            }
+        }
     }
 
-    public void AddState(string stateName, BaseState state)
+    private class SlideState : BaseState
     {
-        state.SetStateMachine(this);
-        stateDic.Add(stateName, state);
-    }
-    
-    public void ChangeState(string stateName)
-    {
-        currentState.Exit();
-        
-        currentState = stateDic[stateName];
+        public SlideState(Character owner) : base(owner) { }
+        public override void Enter()
+        {
+            Debug.Log("Slide");
+            owner.transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
+            owner.capsuleCollider.direction = CapsuleDirection2D.Horizontal;
+        }
 
-        currentState.Enter();
+        public override void Transition()
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            {
+                owner.jumpCount--;
+                ChangeState(State.Jump);
+            }
+            else if (Input.GetKeyUp(KeyCode.S)) 
+            {
+                ChangeState(State.Run);
+            }
+        }
+
+        public override void Exit()
+        {
+            owner.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            owner.capsuleCollider.direction = CapsuleDirection2D.Vertical;
+        }
+
+        public void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
+            {
+                ChangeState(State.Hit);
+            }
+        }
     }
 
-    public void InitState<T>(T stateType) where T : Enum
+    private class HitState : BaseState
     {
-        InitState(stateType.ToString());
-    }
-    public void AddState<T>(T stateType, BaseState state) where T : Enum
-    {
-        AddState(stateType.ToString(), state);
-    }
-    public void ChangeState<T>(T stateType) where T : Enum
-    {
-        ChangeState(stateType.ToString());
+        public HitState(Character owner) : base(owner) { }
+
+        public void Enter() 
+        {
+            owner.curHp--;
+            owner.isInvincible = true;
+            owner.StartCoroutine(owner.BlinkCo(2.0f));
+        }
+
+        public override void Transition()
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            {
+                owner.jumpCount--;
+                ChangeState(State.Jump);
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                ChangeState(State.Slide);
+            }
+            else if (isInvincible == false) 
+            {
+                ChangeState(State.Run);
+            }
+        }
     }
 }
