@@ -10,7 +10,14 @@ public class StateMachine : MonoBehaviour
     private BaseState curState;
     void Start()
     {
-        curState.Enter();
+        if (curState != null)
+        {
+            curState.Enter();
+        }
+        else 
+        {
+            Debug.Log("curState null");
+        }
     }
 
     void Update()
@@ -79,7 +86,8 @@ public class BaseState
 
     protected int maxHp { get { return owner.maxHp; } }
     protected int curHp { get { return owner.curHp; } }
-    protected int jumpCount { get { return owner.jumpCount; } }
+    protected int maxJumpCount { get { return owner.maxJumpCount; } }
+    protected int curJumpCount { get { return owner.curJumpCount; } }
     protected float jumpPower { get { return owner.jumpPower; } }
     protected float magnetRadius { get { return owner.magnetRadius; } }
 
@@ -112,4 +120,5 @@ public class BaseState
     public virtual void Exit() { }
     public virtual void Transition() { }
 
+    public virtual void OnCollision(Collider2D collision) { }
 }

@@ -14,6 +14,10 @@ public class Character : MonoBehaviour
 
     private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
 
+    private Coroutine magnetCo;
+    private Coroutine invincibleCo;
+    private Coroutine blinkCo;
+
     [Header("GroundCheck")]
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
@@ -27,9 +31,11 @@ public class Character : MonoBehaviour
     [Header("Parameter")]
     public int maxHp;
     public int curHp;
-    public int jumpCount;
+    public int maxJumpCount;
+    public int curJumpCount;
     public float jumpPower;
     public float magnetRadius;
+    public LayerMask itemLayer;
 
     public bool isGrounded;
     public bool jumpRequested;
@@ -43,13 +49,16 @@ public class Character : MonoBehaviour
             return;
         }
 
+        //캐릭터 변수
         maxHp = characterData.charHP;
         curHp = maxHp;
-        jumpCount = characterData.charJumpCount;
+        maxJumpCount = characterData.charJumpCount;
+        curJumpCount = maxJumpCount;
         jumpPower = characterData.charJumpPower;
         magnetRadius = characterData.charMagnetRadius;
         isInvincible = false;
 
+        //스테이트 머신
         stateMachine = gameObject.AddComponent<StateMachine>();
         stateMachine.AddState(State.Run, new RunState(this));
         stateMachine.AddState(State.Jump, new JumpState(this));
@@ -57,44 +66,36 @@ public class Character : MonoBehaviour
         stateMachine.AddState(State.Hit, new HitState(this));
         stateMachine.InitState(State.Run);
 
+        //캐릭터 컴포넌트
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
-        
-
-
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-    }
 
-    private void LateUpdate()
-    {
-
+        if (isGrounded && rb.velocity.y <= 0.05f)
+        {
+           curJumpCount = maxJumpCount;
+        }
     }
 
     private void FixedUpdate()
     {
-        if (jumpRequested && jumpCount > 0)
+        if (jumpRequested && curJumpCount > 0)
         {
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            jumpCount--;
+            curJumpCount--;
         }
         jumpRequested = false;
 
         if (isGrounded && rb.velocity.y <= 0.05f)
         {
-            jumpCount = characterData.charJumpCount;
+            curJumpCount = maxJumpCount;
         }
     }
 
@@ -102,19 +103,126 @@ public class Character : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, magnetRadius);
+    }
+
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle") && !isInvincible)
+        {
+            stateMachine.ChangeState(State.Hit);
+        }
+    }
+
+    public void GetDamage(int damage) 
+    {
+        curHp -= damage;
+    }
+
+    public void AttractItem() 
+    {
+        Collider2D[] items = Physics2D.OverlapCircleAll(transform.position, magnetRadius, itemLayer);
+
+        foreach (Collider2D itemCol in items) 
+        {
+            Rigidbody2D itemRb = itemCol.attachedRigidbody;
+
+            if (itemRb != null) 
+            {
+                Vector2 direction = (transform.position - itemRb.transform.position).normalized;
+                itemRb.AddForce(direction * magnetRadius * Time.fixedDeltaTime, ForceMode2D.Force);
+            }
+        }
+    }
+
+
+
+
+    public void Jump() 
+    {
+        curJumpCount--;
+        rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+    }
+
+    public void EnterSlide() 
+    {
+        transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
+        capsuleCollider.direction = CapsuleDirection2D.Horizontal;
+    }
+
+    public void ExitSlide() 
+    {
+        transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        capsuleCollider.direction = CapsuleDirection2D.Vertical;
+    }
+
+    public void ActivateBlink(float duration) 
+    {
+        if (blinkCo != null)
+        {
+            StopCoroutine(blinkCo);
+        }
+        blinkCo = StartCoroutine(BlinkCo(duration));
     }
 
     IEnumerator BlinkCo(float duration)
     {
         float timer = 0.0f;
 
-        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
-
         while (timer < duration)
         {
             spriteRenderer.color = new Color(1f, 0f, 0f, 1f);
             yield return new WaitForSeconds(0.2f);
             spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+            yield return new WaitForSeconds(0.2f);
+
+            timer += 0.4f;
+        }
+    }
+
+    public void ActivateMagnet(float newRadius, float newDuration) 
+    {
+        if (magnetCo != null) 
+        {
+            StopCoroutine(magnetCo);
+        }
+        magnetCo = StartCoroutine(MagnetCo(newRadius, newDuration));
+    }
+
+    IEnumerator MagnetCo(float radius, float duration) 
+    {
+        float originalRadius = magnetRadius;
+        magnetRadius = radius;
+
+        yield return new WaitForSeconds(duration);
+
+        magnetRadius = originalRadius;
+    }
+
+    public void ActivateInvincible(float duration) 
+    {
+        if (invincibleCo != null) 
+        {
+            StopCoroutine(invincibleCo);
+        }
+
+        invincibleCo = StartCoroutine(InvincibleCo(duration));
+    }
+
+    IEnumerator InvincibleCo(float duration) 
+    {
+        isInvincible = true;
+        float timer = 0.0f;
+
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
+
+        while (timer < duration)
+        {
+            spriteRenderer.color = Color.yellow;
+            yield return new WaitForSeconds(0.2f);
+            spriteRenderer.color = Color.white;
             yield return new WaitForSeconds(0.2f);
 
             timer += 0.4f;
@@ -136,23 +244,15 @@ public class Character : MonoBehaviour
 
         public override void Transition()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
-                owner.jumpCount--;
+                owner.Jump();
                 ChangeState(State.Jump);
             }
 
             if (Input.GetKeyDown(KeyCode.S)) 
             {
                 ChangeState(State.Slide);
-            }
-        }
-
-        public void OnCollisionEnter2D(Collision2D collision)
-        {
-            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
-            {
-                ChangeState(State.Hit);
             }
         }
     }
@@ -164,28 +264,20 @@ public class Character : MonoBehaviour
         public override void Enter()
         {
             Debug.Log("Jump");
-            owner.rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            owner.Jump();
         }
 
         public override void Transition()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
-                owner.jumpCount--;
+                owner.Jump();
                 ChangeState(State.Jump);
             }
 
             if (isGrounded && rb.velocity.y <= 0.05f)
             {
                 ChangeState(State.Run);
-            }
-        }
-
-        public void OnCollisionEnter2D(Collision2D collision)
-        {
-            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
-            {
-                ChangeState(State.Hit);
             }
         }
     }
@@ -196,15 +288,14 @@ public class Character : MonoBehaviour
         public override void Enter()
         {
             Debug.Log("Slide");
-            owner.transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
-            owner.capsuleCollider.direction = CapsuleDirection2D.Horizontal;
+            owner.EnterSlide();
         }
 
         public override void Transition()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
-                owner.jumpCount--;
+                owner.Jump();
                 ChangeState(State.Jump);
             }
             else if (Input.GetKeyUp(KeyCode.S)) 
@@ -215,16 +306,7 @@ public class Character : MonoBehaviour
 
         public override void Exit()
         {
-            owner.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            owner.capsuleCollider.direction = CapsuleDirection2D.Vertical;
-        }
-
-        public void OnCollisionEnter2D(Collision2D collision)
-        {
-            if (collision.gameObject.CompareTag("Enemy") && !isInvincible)
-            {
-                ChangeState(State.Hit);
-            }
+            owner.ExitSlide();
         }
     }
 
@@ -234,16 +316,17 @@ public class Character : MonoBehaviour
 
         public void Enter() 
         {
-            owner.curHp--;
-            owner.isInvincible = true;
-            owner.StartCoroutine(owner.BlinkCo(2.0f));
+            Debug.Log("Hit");
+            owner.GetDamage(1);
+            owner.ActivateBlink(2.0f);
+            owner.ActivateInvincible(2.0f);
         }
 
         public override void Transition()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+            if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
-                owner.jumpCount--;
+                owner.Jump();
                 ChangeState(State.Jump);
             }
             else if (Input.GetKeyDown(KeyCode.S))

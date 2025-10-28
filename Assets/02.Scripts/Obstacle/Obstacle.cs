@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Star : Item
+public class Obstacle : MonoBehaviour
 {
     public float speed = 5.0f;
 
@@ -20,16 +20,16 @@ public class Star : Item
             ReturnPool();
         }
     }
+
     private void FixedUpdate()
     {
         rb.velocity = Vector2.left.normalized * speed;
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.transform.CompareTag("Player"))
         {
-            collision.transform.GetComponent<Character>().ActivateInvincible(5.0f);
-            ReturnPool();
+            collision.transform.GetComponent<Character>().GetDamage(1);
         }
     }
 

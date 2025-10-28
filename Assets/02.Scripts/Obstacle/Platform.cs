@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Star : Item
+public class Platform : MonoBehaviour
 {
     public float speed = 5.0f;
 
@@ -11,7 +11,6 @@ public class Star : Item
     {
         rb = GetComponent<Rigidbody2D>();
     }
-
     private void Update()
     {
         Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
@@ -20,17 +19,10 @@ public class Star : Item
             ReturnPool();
         }
     }
+
     private void FixedUpdate()
     {
         rb.velocity = Vector2.left.normalized * speed;
-    }
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.transform.CompareTag("Player"))
-        {
-            collision.transform.GetComponent<Character>().ActivateInvincible(5.0f);
-            ReturnPool();
-        }
     }
 
     private void ReturnPool()
