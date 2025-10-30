@@ -29,7 +29,7 @@ public class Magnet : Item
     {
         if (collision.transform.CompareTag("Player"))
         {
-            collision.transform.GetComponent<Character>().ActivateMagnet(2.0f, 2.0f);
+            collision.transform.GetComponent<Character>().ActivateMagnet(8.0f, 2.0f);
             ReturnPool();
         }
     }

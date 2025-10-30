@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Obstacle : MonoBehaviour
 {
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
+    public bool isNeedRotate;
+
     public float speed = 5.0f;
 
     private Rigidbody2D rb;
@@ -19,18 +24,31 @@ public class Obstacle : MonoBehaviour
         {
             ReturnPool();
         }
+
+        isNeedRotate = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        if (isNeedRotate)
+        {
+            gameObject.transform.Rotate(0f, 0f, 180f);
+        }
     }
 
     private void FixedUpdate()
     {
         rb.velocity = Vector2.left.normalized * speed;
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.CompareTag("Player"))
         {
             collision.transform.GetComponent<Character>().GetDamage(1);
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 
     private void ReturnPool()

@@ -13,10 +13,15 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Platform platformPrefab;
     [SerializeField] private Obstacle obstaclePrefab;
 
+    [SerializeField] private Transform anker;
     private Vector3 nextSpawnPosition = Vector3.zero;
 
+    private SpriteRenderer ankerSr;
+    private float screenRightEdge;
+    private float ankerLeftEdge;
+
     public string mapFolder = "Maps";
-    public float tileSize = 1.0f;
+    public float tileSize = 1.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +34,21 @@ public class MapGenerator : MonoBehaviour
         PoolManager.Instance.CrestePool(platformPrefab, 50);
         PoolManager.Instance.CrestePool(obstaclePrefab, 30);
 
+        ankerSr = anker.GetComponent<SpriteRenderer>();
+        screenRightEdge = Camera.main.ViewportToWorldPoint(new Vector3(1.0f, 0.0f, 0.0f)).x;
+
+        //anker.position = Vector3.zero;
         LoadRandomMap();
+    }
+
+    public void Update()
+    {
+        ankerLeftEdge = anker.transform.position.x - (ankerSr.bounds.size.x / 2.0f);
+
+        if (ankerLeftEdge <= screenRightEdge) 
+        {
+            LoadRandomMap();
+        }
     }
 
     void LoadRandomMap()
@@ -50,6 +69,8 @@ public class MapGenerator : MonoBehaviour
     void GenerateMap(string csvText)
     {
         string[] lines = csvText.Split('\n');
+        nextSpawnPosition = new Vector3(anker.position.x + tileSize, anker.position.y + (lines.Length-1) * tileSize, anker.position.z);
+        
         for (int y = 0; y < lines.Length; y++)
         {
             string[] cells = lines[y].Trim().Split(',');
@@ -61,6 +82,9 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
                 Vector3 position = nextSpawnPosition + new Vector3(x * tileSize, -y * tileSize, 0);
+
+                anker.position = position;
+                //Debug.Log(anker.position);
 
                 switch (cell)
                 {
@@ -113,9 +137,7 @@ public class MapGenerator : MonoBehaviour
                         }
                         break;
                 }
-
             }
         }
     }
-
 }

@@ -28,7 +28,7 @@ public class Potion : Item
     {
         if (collision.transform.CompareTag("Player"))
         {
-            collision.transform.GetComponent<Character>().GetDamage(-1);
+            collision.transform.GetComponent<Character>().RestoreHp(1);
             ReturnPool();
         }
     }

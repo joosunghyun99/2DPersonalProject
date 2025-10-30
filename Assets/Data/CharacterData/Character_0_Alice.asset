@@ -18,4 +18,4 @@ MonoBehaviour:
   charHP: 5
   charJumpCount: 1
   charJumpPower: 8.5
-  charMagnetRadius: 2
+  charMagnetRadius: 3

@@ -82,6 +82,8 @@ public class Character : MonoBehaviour
         {
            curJumpCount = maxJumpCount;
         }
+
+        AttractItem();
     }
 
     private void FixedUpdate()
@@ -108,17 +110,15 @@ public class Character : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, magnetRadius);
     }
 
-    public void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Obstacle") && !isInvincible)
-        {
-            stateMachine.ChangeState(State.Hit);
-        }
-    }
-
     public void GetDamage(int damage) 
     {
         curHp -= damage;
+        stateMachine.ChangeState(State.Hit);
+    }
+
+    public void RestoreHp(int hp) 
+    {
+        curHp += hp;
     }
 
     public void AttractItem() 
@@ -127,18 +127,11 @@ public class Character : MonoBehaviour
 
         foreach (Collider2D itemCol in items) 
         {
-            Rigidbody2D itemRb = itemCol.attachedRigidbody;
-
-            if (itemRb != null) 
-            {
-                Vector2 direction = (transform.position - itemRb.transform.position).normalized;
-                itemRb.AddForce(direction * magnetRadius * Time.fixedDeltaTime, ForceMode2D.Force);
-            }
+            float moveSpeed = magnetRadius;
+            itemCol.transform.position = Vector2.MoveTowards
+                (itemCol.transform.position, gameObject.transform.position, moveSpeed * Time.deltaTime);
         }
     }
-
-
-
 
     public void Jump() 
     {
@@ -170,7 +163,7 @@ public class Character : MonoBehaviour
     IEnumerator BlinkCo(float duration)
     {
         float timer = 0.0f;
-
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
         while (timer < duration)
         {
             spriteRenderer.color = new Color(1f, 0f, 0f, 1f);
@@ -180,6 +173,7 @@ public class Character : MonoBehaviour
 
             timer += 0.4f;
         }
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), false);
     }
 
     public void ActivateMagnet(float newRadius, float newDuration) 
@@ -314,12 +308,10 @@ public class Character : MonoBehaviour
     {
         public HitState(Character owner) : base(owner) { }
 
-        public void Enter() 
+        public override void Enter() 
         {
             Debug.Log("Hit");
-            owner.GetDamage(1);
             owner.ActivateBlink(2.0f);
-            owner.ActivateInvincible(2.0f);
         }
 
         public override void Transition()
