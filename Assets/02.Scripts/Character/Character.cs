@@ -83,6 +83,11 @@ public class Character : MonoBehaviour
            curJumpCount = maxJumpCount;
         }
 
+        if (gameObject.transform.position.y < -20.0f)
+        {
+            GameManager.Instance.GameOver();
+        }
+
         AttractItem();
     }
 
@@ -112,13 +117,24 @@ public class Character : MonoBehaviour
 
     public void GetDamage(int damage) 
     {
-        curHp -= damage;
-        stateMachine.ChangeState(State.Hit);
-    }
+        if (damage > 0) 
+        {
+            stateMachine.ChangeState(State.Hit);
+        }
 
-    public void RestoreHp(int hp) 
-    {
-        curHp += hp;
+        curHp -= damage;
+
+        if (curHp > maxHp) 
+        {
+            curHp = maxHp; 
+        }
+
+        if (curHp <= 0) 
+        {
+            GameManager.Instance.GameOver();
+        }
+
+        GameManager.Instance.PlayerHpUpdate(curHp);
     }
 
     public void AttractItem() 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     public int highScore = 0;
     public int score = 0;
+    public int playerHp = 0;
 
     private void Awake()
     {
@@ -26,5 +28,25 @@ public class GameManager : MonoBehaviour
     {
         score += amount;
         UIManager.Instance.UpdateScore(score);
+    }
+
+    public void GameOver() 
+    {
+        if (score > highScore) 
+        {
+            highScore = score;
+        }
+
+        UIManager.Instance.PopUpResult(highScore, score);
+    }
+
+    public void GameStart() 
+    {
+
+    }
+
+    public void PlayerHpUpdate(int hp) 
+    {
+        UIManager.Instance.UpdateHpSlider(hp);
     }
 }

@@ -29,7 +29,7 @@ public class Coin : Item
     {
         if (collision.transform.CompareTag("Player"))
         {
-            Debug.Log("Coin +1");
+            GameManager.Instance.AddScore(1);
             ReturnPool();
         }
     }
