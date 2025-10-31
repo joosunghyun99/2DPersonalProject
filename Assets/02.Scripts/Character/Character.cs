@@ -327,6 +327,7 @@ public class Character : MonoBehaviour
         public override void Enter() 
         {
             Debug.Log("Hit");
+            SoundManager.Instance.OnPlayerHit();
             owner.ActivateBlink(2.0f);
         }
 

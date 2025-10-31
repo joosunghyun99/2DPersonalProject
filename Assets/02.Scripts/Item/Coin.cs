@@ -29,6 +29,7 @@ public class Coin : Item
     {
         if (collision.transform.CompareTag("Player"))
         {
+            SoundManager.Instance.OnCoinAcquire();
             GameManager.Instance.AddScore(1);
             ReturnPool();
         }
