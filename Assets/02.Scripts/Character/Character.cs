@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ public class Character : MonoBehaviour
 {
     public enum State { Run, Slide, Jump, Hit }
 
+    [Header("PlayerData")]
+    [SerializeField] private CharacterData[] characterDataList;
     public CharacterData characterData;
     private StateMachine stateMachine;
     private State currentState;
@@ -18,10 +21,13 @@ public class Character : MonoBehaviour
     private Coroutine invincibleCo;
     private Coroutine blinkCo;
 
+    [Header("PlayerAnimator")]
+    [SerializeField] private RuntimeAnimatorController[] animControllers;
+
     [Header("GroundCheck")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
 
     public Rigidbody2D rb;
     public SpriteRenderer spriteRenderer;
@@ -34,8 +40,9 @@ public class Character : MonoBehaviour
     public int maxJumpCount;
     public int curJumpCount;
     public float jumpPower;
-    public float magnetRadius;
-    public LayerMask itemLayer;
+    public float originalRadius;
+    public float curRadius;
+    [SerializeField] private LayerMask itemLayer;
 
     public bool isGrounded;
     public bool jumpRequested;
@@ -43,20 +50,19 @@ public class Character : MonoBehaviour
 
     private void Awake()
     {
-        if (characterData == null) 
+        if (characterDataList == null) 
         {
             Debug.Log("CharacterData null");
             return;
         }
 
-        //캐릭터 변수
-        maxHp = characterData.charHP;
-        curHp = maxHp;
-        maxJumpCount = characterData.charJumpCount;
-        curJumpCount = maxJumpCount;
-        jumpPower = characterData.charJumpPower;
-        magnetRadius = characterData.charMagnetRadius;
-        isInvincible = false;
+        Debug.Log($"GameManager.Instance: {GameManager.Instance}");
+
+        //캐릭터 컴포넌트
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>();
+        anim = GetComponent<Animator>();
 
         //스테이트 머신
         stateMachine = gameObject.AddComponent<StateMachine>();
@@ -65,12 +71,21 @@ public class Character : MonoBehaviour
         stateMachine.AddState(State.Slide, new SlideState(this));
         stateMachine.AddState(State.Hit, new HitState(this));
         stateMachine.InitState(State.Run);
+    }
 
-        //캐릭터 컴포넌트
-        rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        capsuleCollider = GetComponent<CapsuleCollider2D>();
-        anim = GetComponent<Animator>();
+    private void Start()
+    {
+        SelectCharacter(GameManager.Instance.selectedCharacter);
+
+        //캐릭터 변수
+        maxHp = characterData.charHP;
+        curHp = maxHp;
+        maxJumpCount = characterData.charJumpCount;
+        curJumpCount = maxJumpCount;
+        jumpPower = characterData.charJumpPower;
+        originalRadius = characterData.charMagnetRadius;
+        curRadius = originalRadius;
+        isInvincible = false;
     }
 
     // Update is called once per frame
@@ -112,7 +127,21 @@ public class Character : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, magnetRadius);
+        Gizmos.DrawWireSphere(transform.position, curRadius);
+    }
+
+    public void SelectCharacter(int index) 
+    {
+        if (index < 0 || index >= animControllers.Length)
+        {
+            return;
+        }
+        else 
+        {
+            Debug.Log(index);
+            anim.runtimeAnimatorController = animControllers[index];
+            characterData = characterDataList[index];
+        }
     }
 
     public void GetDamage(int damage) 
@@ -139,11 +168,11 @@ public class Character : MonoBehaviour
 
     public void AttractItem() 
     {
-        Collider2D[] items = Physics2D.OverlapCircleAll(transform.position, magnetRadius, itemLayer);
+        Collider2D[] items = Physics2D.OverlapCircleAll(transform.position, curRadius, itemLayer);
 
         foreach (Collider2D itemCol in items) 
         {
-            float moveSpeed = magnetRadius;
+            float moveSpeed = curRadius;
             itemCol.transform.position = Vector2.MoveTowards
                 (itemCol.transform.position, gameObject.transform.position, moveSpeed * Time.deltaTime);
         }
@@ -157,14 +186,18 @@ public class Character : MonoBehaviour
 
     public void EnterSlide() 
     {
-        transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
+       //transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
         capsuleCollider.direction = CapsuleDirection2D.Horizontal;
+        capsuleCollider.size = new Vector2(1.8f, 0.9f);
+        capsuleCollider.offset = new Vector2(0.3f, -0.5f);
     }
 
     public void ExitSlide() 
     {
-        transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        //transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         capsuleCollider.direction = CapsuleDirection2D.Vertical;
+        capsuleCollider.size = new Vector2(0.9f, 1.8f);
+        capsuleCollider.offset = new Vector2(0.3f, -0.1f);
     }
 
     public void ActivateBlink(float duration) 
@@ -198,17 +231,17 @@ public class Character : MonoBehaviour
         {
             StopCoroutine(magnetCo);
         }
+
         magnetCo = StartCoroutine(MagnetCo(newRadius, newDuration));
     }
 
     IEnumerator MagnetCo(float radius, float duration) 
     {
-        float originalRadius = magnetRadius;
-        magnetRadius = radius;
+        curRadius = radius;
 
         yield return new WaitForSeconds(duration);
 
-        magnetRadius = originalRadius;
+        curRadius = originalRadius;
     }
 
     public void ActivateInvincible(float duration) 
@@ -250,6 +283,7 @@ public class Character : MonoBehaviour
         public override void Enter()
         {
             Debug.Log("Run");
+            anim.Play("Run");
         }
 
         public override void Transition()
@@ -275,6 +309,7 @@ public class Character : MonoBehaviour
         {
             Debug.Log("Jump");
             owner.Jump();
+            anim.Play("Jump");
         }
 
         public override void Transition()
@@ -299,6 +334,7 @@ public class Character : MonoBehaviour
         {
             Debug.Log("Slide");
             owner.EnterSlide();
+            anim.Play("Slide");
         }
 
         public override void Transition()

@@ -15,12 +15,12 @@ public class ObjectPool<T> where T : MonoBehaviour
         Root = new GameObject($"{prefab.name}_pool").transform;
         Object.DontDestroyOnLoad(Root.gameObject);
 
-        if (parent != null) 
+        if (parent != null)
         {
             Root.SetParent(parent, false);
         }
 
-        for (int i = 0; i < generateCount; i++) 
+        for (int i = 0; i < generateCount; i++)
         {
             var instance = Object.Instantiate(prefab, Root);
             instance.name = prefab.name;
@@ -29,16 +29,24 @@ public class ObjectPool<T> where T : MonoBehaviour
         }
     }
 
-    public T Dequeue() 
+    public T Dequeue()
     {
         if (pool.Count == 0) return null;
 
         var instance = pool.Dequeue();
-        instance.gameObject.SetActive(true);
-        return instance;
+
+        if (instance == null || instance.gameObject == null)
+        {
+            return null;
+        }
+        else 
+        {
+            instance.gameObject.SetActive(true);
+            return instance;
+        }
     }
 
-    public void Enqueue(T instance) 
+    public void Enqueue(T instance)
     {
         if (instance == null) return;
 

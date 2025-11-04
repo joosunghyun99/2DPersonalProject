@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("GameScene")]
     [SerializeField] private TextMeshProUGUI curScoreText;
     [SerializeField] private TextMeshProUGUI highScoreText;
     [SerializeField] private TextMeshProUGUI newScoreText;
@@ -16,6 +17,21 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private GameObject lobbySceneUI;
     [SerializeField] private GameObject gameSceneUI;
+
+    [Header("LobbyScene")]
+    [SerializeField] private TextMeshProUGUI characterInfoText;
+
+    [SerializeField] private Slider effectSoundSlider;
+    [SerializeField] private Slider bgmSlider;
+
+    [SerializeField] private GameObject optionPanel;
+    [SerializeField] private GameObject characterPanel;
+    [SerializeField] private GameObject shopPanel;
+
+    [SerializeField] private Image characterImage;
+
+    [SerializeField] private Sprite[] characterSprite;
+    private int characterIndex = 0;
 
     public static UIManager Instance { get; private set; }
 
@@ -30,19 +46,37 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
 
-        resultPanel.SetActive(false);
+    public void PopUp(GameObject panel) 
+    {
+        if (panel.activeSelf == true)
+        {
+            panel.SetActive(false);
+        }
+        else 
+        {
+            panel.SetActive(true);
+        }
+    }
 
-        if (SceneManager.GetActiveScene().name == "GameScene")
+    public void IndexChange(int index) 
+    {
+        characterIndex += index;
+        if (characterIndex < 0)
         {
-            lobbySceneUI.SetActive(false);
-            gameSceneUI.SetActive(true);
+            characterIndex = characterSprite.Length - 1;
         }
-        else
+        else if (characterIndex >= characterSprite.Length)
         {
-            lobbySceneUI.SetActive(true);
-            gameSceneUI.SetActive(false);
+            characterIndex = 0;
         }
+        characterImage.sprite = characterSprite[characterIndex];
+    }
+
+    public void CharacterSelect() 
+    {
+        GameManager.Instance.SelectCharacter(characterIndex);
     }
 
     public void UpdateScore(int newScore) 
@@ -60,12 +94,6 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene("LobbyScene");
     }
 
-    public void Restart() 
-    {
-        Time.timeScale = 1.0f;
-        SceneManager.LoadScene("GameScene");
-    }
-
     public void StartGame() 
     {
         SceneManager.LoadScene("GameScene");
@@ -77,5 +105,24 @@ public class UIManager : MonoBehaviour
         resultPanel.SetActive(true);
         highScoreText.text = $"HighScore : {highScore}";
         newScoreText.text = $"Score : {newScore}";
+    }
+
+    public void InitScene() 
+    {
+        resultPanel.SetActive(false);
+
+        gameSceneUI.SetActive(false);
+        lobbySceneUI.SetActive(false);
+
+        if (SceneManager.GetActiveScene().name == "GameScene")
+        {
+            gameSceneUI.SetActive(true);
+        }
+        else
+        {
+            lobbySceneUI.SetActive(true);
+        }
+
+        Time.timeScale = 1.0f;
     }
 }

@@ -24,23 +24,22 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void OnButtonClick() 
     {
-        audioSource.clip = beep;
-        audioSource.Play();
+        audioSource.PlayOneShot(beep);
     }
 
     public void OnPlayerHit() 
     {
-        audioSource.clip = hit;
-        audioSource.Play();
+        audioSource.PlayOneShot(hit);
     }
 
     public void OnCoinAcquire() 
     {
-        audioSource.clip = coin;
-        audioSource.Play();
+        audioSource.PlayOneShot(coin);
     }
 }

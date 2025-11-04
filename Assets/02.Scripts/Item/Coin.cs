@@ -35,7 +35,7 @@ public class Coin : Item
         }
     }
 
-    private void ReturnPool()
+    public void ReturnPool()
     {
         PoolManager.Instance.ReturnPool(this, this);
     }

@@ -25,6 +25,7 @@ public class Magnet : Item
     {
         rb.velocity = Vector2.left.normalized * speed;
     }
+    
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.CompareTag("Player"))
@@ -34,7 +35,7 @@ public class Magnet : Item
         }
     }
 
-    private void ReturnPool()
+    public void ReturnPool()
     {
         PoolManager.Instance.ReturnPool(this, this);
     }

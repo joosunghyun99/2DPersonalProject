@@ -89,7 +89,8 @@ public class BaseState
     protected int maxJumpCount { get { return owner.maxJumpCount; } }
     protected int curJumpCount { get { return owner.curJumpCount; } }
     protected float jumpPower { get { return owner.jumpPower; } }
-    protected float magnetRadius { get { return owner.magnetRadius; } }
+    protected float originalRadius { get { return owner.originalRadius; } }
+    protected float curRadius { get { return owner.curRadius; } }
 
     protected bool isGrounded { get { return owner.isGrounded; } }
     protected bool jumpRequested { get { return owner.jumpRequested; } }

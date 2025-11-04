@@ -37,6 +37,7 @@ public class Obstacle : MonoBehaviour
     {
         rb.velocity = Vector2.left.normalized * speed;
     }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.CompareTag("Player"))
@@ -51,7 +52,7 @@ public class Obstacle : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 
-    private void ReturnPool()
+    public void ReturnPool()
     {
         PoolManager.Instance.ReturnPool(this, this);
     }

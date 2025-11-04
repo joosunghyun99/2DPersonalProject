@@ -25,7 +25,7 @@ public class Platform : MonoBehaviour
         rb.velocity = Vector2.left.normalized * speed;
     }
 
-    private void ReturnPool()
+    public void ReturnPool()
     {
         PoolManager.Instance.ReturnPool(this, this);
     }

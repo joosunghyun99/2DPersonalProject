@@ -31,7 +31,7 @@ public class MapGenerator : MonoBehaviour
         PoolManager.Instance.CrestePool(starPrefab, 10);
         PoolManager.Instance.CrestePool(magnetPrefab, 10);
 
-        PoolManager.Instance.CrestePool(platformPrefab, 50);
+        PoolManager.Instance.CrestePool(platformPrefab, 80);
         PoolManager.Instance.CrestePool(obstaclePrefab, 30);
 
         ankerSr = anker.GetComponent<SpriteRenderer>();

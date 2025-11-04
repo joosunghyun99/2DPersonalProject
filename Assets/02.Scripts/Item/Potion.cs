@@ -24,6 +24,7 @@ public class Potion : Item
     {
         rb.velocity = Vector2.left.normalized * speed;
     }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.CompareTag("Player"))
@@ -33,7 +34,7 @@ public class Potion : Item
         }
     }
 
-    private void ReturnPool()
+    public void ReturnPool()
     {
         PoolManager.Instance.ReturnPool(this, this);
     }

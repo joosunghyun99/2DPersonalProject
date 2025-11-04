@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc895cf6520e5d84fa6577bd5926fabd, type: 3}
-  m_Name: Character_0_Alice
+  m_Name: Character_2_Yellow
   m_EditorClassIdentifier: 
-  charName: Alice
-  charDescription: HighHP
-  charID: 0
-  charHP: 5
-  charJumpCount: 1
-  charJumpPower: 8.5
+  charName: Yellow
+  charDescription: DoubleJump / NormalHP
+  charID: 2
+  charHP: 4
+  charJumpCount: 2
+  charJumpPower: 5
   charMagnetRadius: 3
