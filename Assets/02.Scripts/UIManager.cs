@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -203,6 +204,11 @@ public class UIManager : MonoBehaviour
         newScoreText.text = $"Score : {newScore}";
     }
 
+    public void ExitGame() 
+    {
+        Application.Quit();
+    }
+
     public void InitScene() 
     {
         resultPanel.SetActive(false);
@@ -213,6 +219,7 @@ public class UIManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "GameScene")
         {
             gameSceneUI.SetActive(true);
+            GameManager.Instance.GameStart();
         }
         else
         {
