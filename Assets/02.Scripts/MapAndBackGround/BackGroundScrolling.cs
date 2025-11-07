@@ -10,12 +10,15 @@ public class BackGroundScrolling : MonoBehaviour
 
     public GameObject[] sprites; //3°³
     private float halfScreenSizeX;
+    private float spriteSizeX;
+
     private SpriteRenderer spriteRenderer;
 
     // Start is called before the first frame update
     void Start()
     {
         halfScreenSizeX = Camera.main.orthographicSize * Camera.main.aspect; 
+        spriteSizeX = sprites[0].GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
     // Update is called once per frame
@@ -28,7 +31,7 @@ public class BackGroundScrolling : MonoBehaviour
 
         if (spriteRightEdge < cameraLeftEdge)
         {
-            sprites[0].transform.position = sprites[2].transform.position + Vector3.right * halfScreenSizeX * 2;
+            sprites[0].transform.position = sprites[2].transform.position + Vector3.right * spriteSizeX;
 
             //½º¿Ò
             GameObject temp = sprites[0];

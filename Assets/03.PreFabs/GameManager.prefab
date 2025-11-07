@@ -44,8 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc7e1b0d48e5794a8370b7d15891306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterOwned: []
   highScore: 0
   score: 0
-  playerHp: 0
   selectedCharacter: 0
   originalPlayerPos: {x: -7, y: 0}
+  gold: 200

@@ -104,6 +104,7 @@ MonoBehaviour:
   itemName: 
   itemDescription: 
   itemID: 0
+  itemSprite: {fileID: 1833327857, guid: c81286fc7eed36d4cbbd4dc6215d3eb2, type: 3}
   speed: 5
 --- !u!61 &4585370290187948393
 BoxCollider2D:

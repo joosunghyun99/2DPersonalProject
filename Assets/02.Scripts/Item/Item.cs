@@ -9,6 +9,7 @@ public class Item : MonoBehaviour
     public string itemName;
     public string itemDescription;
     public int itemID;
+    public Sprite itemSprite;
 
     private void Awake()
     {

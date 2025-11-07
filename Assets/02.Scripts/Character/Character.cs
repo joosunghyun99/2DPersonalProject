@@ -52,11 +52,8 @@ public class Character : MonoBehaviour
     {
         if (characterDataList == null) 
         {
-            Debug.Log("CharacterData null");
             return;
         }
-
-        Debug.Log($"GameManager.Instance: {GameManager.Instance}");
 
         //캐릭터 컴포넌트
         rb = GetComponent<Rigidbody2D>();
@@ -86,6 +83,8 @@ public class Character : MonoBehaviour
         originalRadius = characterData.charMagnetRadius;
         curRadius = originalRadius;
         isInvincible = false;
+
+        UIManager.Instance.SetHpSlider(curHp, maxHp);
     }
 
     // Update is called once per frame
@@ -138,7 +137,6 @@ public class Character : MonoBehaviour
         }
         else 
         {
-            Debug.Log(index);
             anim.runtimeAnimatorController = animControllers[index];
             characterData = characterDataList[index];
         }
@@ -186,7 +184,6 @@ public class Character : MonoBehaviour
 
     public void EnterSlide() 
     {
-       //transform.localScale = new Vector3(2.0f, 0.5f, 1.0f);
         capsuleCollider.direction = CapsuleDirection2D.Horizontal;
         capsuleCollider.size = new Vector2(1.8f, 0.9f);
         capsuleCollider.offset = new Vector2(0.3f, -0.5f);
@@ -194,7 +191,6 @@ public class Character : MonoBehaviour
 
     public void ExitSlide() 
     {
-        //transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         capsuleCollider.direction = CapsuleDirection2D.Vertical;
         capsuleCollider.size = new Vector2(0.9f, 1.8f);
         capsuleCollider.offset = new Vector2(0.3f, -0.1f);
@@ -276,13 +272,23 @@ public class Character : MonoBehaviour
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), false);
     }
 
+    public void ButtonJump() 
+    {
+       stateMachine.ChangeState(State.Jump);
+    }
+
+    public void ButtonSlide(int num) 
+    {
+        if (num == 1) { stateMachine.ChangeState(State.Slide); }
+        else { stateMachine.ChangeState(State.Run); }
+    }
+
     private class RunState : BaseState
     {
         public RunState(Character owner) : base(owner) { }
 
         public override void Enter()
         {
-            Debug.Log("Run");
             anim.Play("Run");
         }
 
@@ -307,9 +313,12 @@ public class Character : MonoBehaviour
 
         public override void Enter()
         {
-            Debug.Log("Jump");
-            owner.Jump();
-            anim.Play("Jump");
+            if (isGrounded && curJumpCount > 0)
+            {
+                SoundManager.Instance.OnPlayerJump();
+                owner.Jump();
+                anim.Play("Jump");
+            }
         }
 
         public override void Transition()
@@ -332,7 +341,6 @@ public class Character : MonoBehaviour
         public SlideState(Character owner) : base(owner) { }
         public override void Enter()
         {
-            Debug.Log("Slide");
             owner.EnterSlide();
             anim.Play("Slide");
         }
@@ -362,7 +370,6 @@ public class Character : MonoBehaviour
 
         public override void Enter() 
         {
-            Debug.Log("Hit");
             SoundManager.Instance.OnPlayerHit();
             owner.ActivateBlink(2.0f);
         }

@@ -16,8 +16,10 @@ public class CSVImporter : EditorWindow
         = "https://docs.google.com/spreadsheets/d/1hHqiJAxyAH7mlPhK_Ju-aB2Xg7pe64iD2wDnvnq6mfg/export?format=csv";
     public string csvItemURL
         = "https://docs.google.com/spreadsheets/d/1gvUeY1-aoUYnaQpVjtdAXHEJxkZ9XCemsN6IN5bIipg/export?format=csv";
+    public string csvProductURL
+        = "https://docs.google.com/spreadsheets/d/16Hb0yWRwC1q7dGZXP3g1Z3GH_ygt0ie1qDoA7qRSI6E/export?format=csv";
 
-     
+
     private string savePath;
 
     [MenuItem("Tools/Import Data From Google Sheets")]
@@ -30,42 +32,42 @@ public class CSVImporter : EditorWindow
     {
         GUILayout.Label("Google Sheet CSV URL", EditorStyles.boldLabel);
 
-        csvCharacterURL = EditorGUILayout.TextField("CSV URL", csvCharacterURL);
-        csvItemURL = EditorGUILayout.TextField("CSV URL", csvItemURL);
+        csvCharacterURL = EditorGUILayout.TextField("Character URL", csvCharacterURL);
+        csvItemURL = EditorGUILayout.TextField("Item URL", csvItemURL);
+        csvProductURL = EditorGUILayout.TextField("Product URL", csvProductURL);
 
-        //캐릭터 데이터
         if (GUILayout.Button("Download and Generate SO / Character"))
-        {
-            //에디터 잔용 코루틴
+        {  
             EditorCoroutineUtility.StartCoroutineOwnerless(ImportCSVCharacter());
         }
-
-        //아이템 데이터
+        
         if (GUILayout.Button("Download and Generate SO / Item"))
-        {
-            //에디터 잔용 코루틴
+        {            
             EditorCoroutineUtility.StartCoroutineOwnerless(ImportCSVItem());
         }
 
+        if (GUILayout.Button("Download and Generate SO / Product"))
+        {
+            EditorCoroutineUtility.StartCoroutineOwnerless(ImportCSVProduct());
+        }
     }
 
     //csv가져와서 스크립터블 오브젝트 생성하는 코루틴
     IEnumerator ImportCSVCharacter()
     {
-        savePath = $"Assets/Data/CharacterData";
-        //저장경로 없으면 새로 만들기
+        savePath = $"Assets/Resources/Data/CharacterData";
+        
         if (!Directory.Exists(savePath))
         {
             Directory.CreateDirectory(savePath);
         }
-        //csv가져오기요첨
+        
         UnityWebRequest www = UnityWebRequest.Get(csvCharacterURL);
-        //요청보내고대기
+        
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("DownloadFail" + www.error);
             yield break;
         }
 
@@ -93,26 +95,23 @@ public class CSVImporter : EditorWindow
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-
-        Debug.Log("캐릭터 데이터 SO 생성완료");
     }
 
     IEnumerator ImportCSVItem()
     {
-        savePath = $"Assets/Data/ItemData";
-        //저장경로 없으면 새로 만들기
+        savePath = $"Assets/Resources/Data/ItemData";
+        
         if (!Directory.Exists(savePath))
         {
             Directory.CreateDirectory(savePath);
         }
-        //csv가져오기요첨
+        
         UnityWebRequest www = UnityWebRequest.Get(csvItemURL);
-        //요청보내고대기
+        
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("DownloadFail" + www.error);
             yield break;
         }
 
@@ -136,7 +135,46 @@ public class CSVImporter : EditorWindow
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+    }
 
-        Debug.Log("아이템 데이터 SO 생성완료");
+    IEnumerator ImportCSVProduct()
+    {
+        savePath = $"Assets/Resources/Data/ProductData";
+
+        if (!Directory.Exists(savePath))
+        {
+            Directory.CreateDirectory(savePath);
+        }
+
+        UnityWebRequest www = UnityWebRequest.Get(csvProductURL);
+
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            yield break;
+        }
+
+        string[] lines = www.downloadHandler.text.Split("\n");
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(lines[i])) continue;
+
+            string[] value = lines[i].Split(',');
+
+            ProductData product = ScriptableObject.CreateInstance<ProductData>();
+            product.productName = value[0];
+            product.description = value[1];
+            product.price = int.Parse(value[2]);
+            product.id = int.Parse(value[3]);
+
+            string assetPath = $"{savePath}/Product_{product.productName}.asset";
+
+            AssetDatabase.CreateAsset(product, assetPath);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 }

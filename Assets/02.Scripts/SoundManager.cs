@@ -9,8 +9,10 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip coin;
     [SerializeField] private AudioClip beep;
     [SerializeField] private AudioClip hit;
+    [SerializeField] private AudioClip Jump;
 
-    private AudioSource audioSource;
+    [SerializeField] private AudioSource effectSource;
+    [SerializeField] private AudioSource bgmSource;
 
 
     private void Awake()
@@ -24,22 +26,54 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
 
-        audioSource = GetComponent<AudioSource>();
+    private void Start()
+    {
+        BGMOnOff(0);
     }
 
     public void OnButtonClick() 
     {
-        audioSource.PlayOneShot(beep);
+        effectSource.PlayOneShot(beep);
     }
 
     public void OnPlayerHit() 
     {
-        audioSource.PlayOneShot(hit);
+        effectSource.PlayOneShot(hit);
     }
 
     public void OnCoinAcquire() 
     {
-        audioSource.PlayOneShot(coin);
+        effectSource.PlayOneShot(coin);
+    }
+
+    public void OnPlayerJump() 
+    {
+        effectSource.PlayOneShot(Jump);
+    }
+
+    public void BGMOnOff(int mode) 
+    {
+        if (mode == 0)
+        {
+            bgmSource.Stop();
+        }
+        else if (mode == 1)
+        {
+            bgmSource.Play();
+        }
+    }
+
+    public void SetVolume(int num, float value) 
+    {
+        if (num == 0)
+        {
+            effectSource.volume = value;
+        }
+        else if (num == 1) 
+        {
+            bgmSource.volume = value;
+        }  
     }
 }

@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc895cf6520e5d84fa6577bd5926fabd, type: 3}
-  m_Name: Character_1_Orange
+  m_Name: Character_0_Blue
   m_EditorClassIdentifier: 
-  charName: Orange
-  charDescription: DoubleJump / LowHP
-  charID: 1
-  charHP: 3
-  charJumpCount: 2
-  charJumpPower: 5
-  charMagnetRadius: 4.5
+  charName: Blue
+  charDescription: HighHP
+  charID: 0
+  charHP: 5
+  charJumpCount: 1
+  charJumpPower: 16
+  charMagnetRadius: 3
+  charSprite: {fileID: -1279095909, guid: 6a22032f8d505da49b2ea09f6261d18b, type: 3}

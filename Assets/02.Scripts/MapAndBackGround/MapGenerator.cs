@@ -26,13 +26,13 @@ public class MapGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PoolManager.Instance.CrestePool(coinPrefab, 30);
-        PoolManager.Instance.CrestePool(potionPrefab, 10);
-        PoolManager.Instance.CrestePool(starPrefab, 10);
-        PoolManager.Instance.CrestePool(magnetPrefab, 10);
+        PoolManager.Instance.CreatePool(coinPrefab, 30);
+        PoolManager.Instance.CreatePool(potionPrefab, 10);
+        PoolManager.Instance.CreatePool(starPrefab, 10);
+        PoolManager.Instance.CreatePool(magnetPrefab, 10);
 
-        PoolManager.Instance.CrestePool(platformPrefab, 80);
-        PoolManager.Instance.CrestePool(obstaclePrefab, 30);
+        PoolManager.Instance.CreatePool(platformPrefab, 80);
+        PoolManager.Instance.CreatePool(obstaclePrefab, 30);
 
         ankerSr = anker.GetComponent<SpriteRenderer>();
         screenRightEdge = Camera.main.ViewportToWorldPoint(new Vector3(1.0f, 0.0f, 0.0f)).x;

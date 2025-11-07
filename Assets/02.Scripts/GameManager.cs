@@ -8,11 +8,15 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    public List<CharacterData> characterOwned = new List<CharacterData>();
+    private CharacterData[] characterDatas;
+
     public int highScore = 0;
     public int score = 0;
-    public int playerHp = 0;
     public int selectedCharacter = 0;
     public Vector2 originalPlayerPos = new Vector2(-7.0f, 0.0f);
+
+    public int gold = 200;
 
     private void Awake()
     {
@@ -25,21 +29,9 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
 
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        UIManager.Instance.InitScene();
+        characterDatas = Resources.LoadAll<CharacterData>("Data/CharacterData");
+        characterOwned.Add(characterDatas[0]);
     }
 
     public void AddScore(int amount) 
@@ -55,12 +47,21 @@ public class GameManager : MonoBehaviour
             highScore = score;
         }
         UIManager.Instance.PopUpResult(highScore, score);
+        SoundManager.Instance.BGMOnOff(0);
+        GetReward();
         ResetObject();
     }
 
     public void GameStart() 
     {
+        score = 0;
         UIManager.Instance.StartGame();
+        SoundManager.Instance.BGMOnOff(1);
+    }
+
+    public void GetReward() 
+    {
+        gold += score/10;
     }
 
     public void PlayerHpUpdate(int hp) 
@@ -89,5 +90,27 @@ public class GameManager : MonoBehaviour
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         player.transform.position = originalPlayerPos;
+    }
+
+    public void PurchaseCharacter(ProductCard product) 
+    {
+        if (gold >= product.price)
+        {
+            for (int i = 0; i < characterDatas.Length; i++)
+            {
+                if (product.productId == characterDatas[i].charID)
+                {
+                    characterOwned.Add(characterDatas[i]);
+                    gold -= product.price;
+                    product.SoldOut();
+                    UIManager.Instance.UpdateGold();
+                    break;
+                }
+            }
+        }
+        else
+        {
+            UIManager.Instance.NoticePopUp("Not Enough Gold!");
+        }
     }
 }

@@ -16,7 +16,7 @@ public class StateMachine : MonoBehaviour
         }
         else 
         {
-            Debug.Log("curState null");
+            return;
         }
     }
 

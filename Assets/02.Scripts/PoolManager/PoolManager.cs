@@ -21,7 +21,7 @@ public class PoolManager : MonoBehaviour
         }
     }
 
-    public void CrestePool<T>(T prefab, int generateCount, Transform parent = null) where T : MonoBehaviour 
+    public void CreatePool<T>(T prefab, int generateCount, Transform parent = null) where T : MonoBehaviour 
     {
         if (prefab == null) return;
 
