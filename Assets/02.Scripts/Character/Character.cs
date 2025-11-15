@@ -72,9 +72,10 @@ public class Character : MonoBehaviour
 
     private void Start()
     {
+        //선택 캐릭터 받아오기
         SelectCharacter(GameManager.Instance.selectedCharacter);
 
-        //캐릭터 변수
+        //캐릭터 변수 가져오기
         maxHp = characterData.charHP;
         curHp = maxHp;
         maxJumpCount = characterData.charJumpCount;
@@ -84,12 +85,14 @@ public class Character : MonoBehaviour
         curRadius = originalRadius;
         isInvincible = false;
 
+        //hp 전달
         UIManager.Instance.SetHpSlider(curHp, maxHp);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //땅 체크
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
         if (isGrounded && rb.velocity.y <= 0.05f)
@@ -97,23 +100,19 @@ public class Character : MonoBehaviour
            curJumpCount = maxJumpCount;
         }
 
+        //추락체크
         if (gameObject.transform.position.y < -20.0f)
         {
             GameManager.Instance.GameOver();
         }
 
+        //아이템 끌어당기기
         AttractItem();
     }
 
     private void FixedUpdate()
     {
-        if (jumpRequested && curJumpCount > 0)
-        {
-            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            curJumpCount--;
-        }
-        jumpRequested = false;
-
+        //땅에 닿으면 점프 횟수 초기화
         if (isGrounded && rb.velocity.y <= 0.05f)
         {
             curJumpCount = maxJumpCount;
@@ -122,6 +121,7 @@ public class Character : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        //땅 체크, 자석 범위 기즈모
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
@@ -131,12 +131,14 @@ public class Character : MonoBehaviour
 
     public void SelectCharacter(int index) 
     {
+        //인덱스가 0보다 작거나 가진 애니메이터 수보다 크면 무시
         if (index < 0 || index >= animControllers.Length)
         {
             return;
         }
         else 
         {
+            //아니면 해당하는 인덱스의 애니메이터, 캐릭터 데이터 할당
             anim.runtimeAnimatorController = animControllers[index];
             characterData = characterDataList[index];
         }
@@ -144,6 +146,7 @@ public class Character : MonoBehaviour
 
     public void GetDamage(int damage) 
     {
+        //데미지가 0보다 크면 피격
         if (damage > 0) 
         {
             stateMachine.ChangeState(State.Hit);
@@ -151,23 +154,28 @@ public class Character : MonoBehaviour
 
         curHp -= damage;
 
+        //hp가 맥스를 넘으면 맥스로 고정
         if (curHp > maxHp) 
         {
             curHp = maxHp; 
         }
 
+        //0이거나 작으면 게임오버
         if (curHp <= 0) 
         {
             GameManager.Instance.GameOver();
         }
 
+        //hp전달
         GameManager.Instance.PlayerHpUpdate(curHp);
     }
 
     public void AttractItem() 
     {
+        //아이템 전부 받아와서
         Collider2D[] items = Physics2D.OverlapCircleAll(transform.position, curRadius, itemLayer);
 
+        //캐릭터 방향으로 움직이기
         foreach (Collider2D itemCol in items) 
         {
             float moveSpeed = curRadius;
@@ -178,12 +186,14 @@ public class Character : MonoBehaviour
 
     public void Jump() 
     {
+        //점프
         curJumpCount--;
         rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
     }
 
     public void EnterSlide() 
     {
+        //콜라이더 조정해서 누운 모양으로 만듬
         capsuleCollider.direction = CapsuleDirection2D.Horizontal;
         capsuleCollider.size = new Vector2(1.8f, 0.9f);
         capsuleCollider.offset = new Vector2(0.3f, -0.5f);
@@ -191,6 +201,7 @@ public class Character : MonoBehaviour
 
     public void ExitSlide() 
     {
+        //콜라이더 원래대로
         capsuleCollider.direction = CapsuleDirection2D.Vertical;
         capsuleCollider.size = new Vector2(0.9f, 1.8f);
         capsuleCollider.offset = new Vector2(0.3f, -0.1f);
@@ -198,6 +209,7 @@ public class Character : MonoBehaviour
 
     public void ActivateBlink(float duration) 
     {
+        //피격시 무적 코루틴 호출
         if (blinkCo != null)
         {
             StopCoroutine(blinkCo);
@@ -208,21 +220,25 @@ public class Character : MonoBehaviour
     IEnumerator BlinkCo(float duration)
     {
         float timer = 0.0f;
+        //장애물 레이어 충돌 무시
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
+        //일정시간 빨갛게 깜빡거리기
         while (timer < duration)
         {
-            spriteRenderer.color = new Color(1f, 0f, 0f, 1f);
+            spriteRenderer.color = Color.red;
             yield return new WaitForSeconds(0.2f);
-            spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+            spriteRenderer.color = Color.red;
             yield return new WaitForSeconds(0.2f);
 
             timer += 0.4f;
         }
+        //다시 충돌 키기
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), false);
     }
 
     public void ActivateMagnet(float newRadius, float newDuration) 
     {
+        //자석 코루틴 호출
         if (magnetCo != null) 
         {
             StopCoroutine(magnetCo);
@@ -233,15 +249,17 @@ public class Character : MonoBehaviour
 
     IEnumerator MagnetCo(float radius, float duration) 
     {
+        //범위 늘리기
         curRadius = radius;
-
+        //기다리기
         yield return new WaitForSeconds(duration);
-
+        //범위 원래대로
         curRadius = originalRadius;
     }
 
     public void ActivateInvincible(float duration) 
     {
+        //무적 코루틴 호출
         if (invincibleCo != null) 
         {
             StopCoroutine(invincibleCo);
@@ -255,8 +273,10 @@ public class Character : MonoBehaviour
         isInvincible = true;
         float timer = 0.0f;
 
+        //장애물 레이어 충돌 무시
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), true);
 
+        //일정시간 노란색으로 점멸
         while (timer < duration)
         {
             spriteRenderer.color = Color.yellow;
@@ -272,11 +292,12 @@ public class Character : MonoBehaviour
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Obstacle"), false);
     }
 
+    //버튼 조작용 (미완)
     public void ButtonJump() 
     {
        stateMachine.ChangeState(State.Jump);
     }
-
+    //버튼 조작용 (미완)
     public void ButtonSlide(int num) 
     {
         if (num == 1) { stateMachine.ChangeState(State.Slide); }
@@ -294,12 +315,13 @@ public class Character : MonoBehaviour
 
         public override void Transition()
         {
+            //점프
             if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
                 owner.Jump();
                 ChangeState(State.Jump);
             }
-
+            //슬라이드
             if (Input.GetKeyDown(KeyCode.S)) 
             {
                 ChangeState(State.Slide);
@@ -313,6 +335,7 @@ public class Character : MonoBehaviour
 
         public override void Enter()
         {
+            //땅이고 점프횟수가 남아있으면
             if (isGrounded && curJumpCount > 0)
             {
                 SoundManager.Instance.OnPlayerJump();
@@ -323,12 +346,14 @@ public class Character : MonoBehaviour
 
         public override void Transition()
         {
+            //이단 점프
             if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
                 owner.Jump();
                 ChangeState(State.Jump);
             }
 
+            //착지하면 달리기
             if (isGrounded && rb.velocity.y <= 0.05f)
             {
                 ChangeState(State.Run);
@@ -347,11 +372,13 @@ public class Character : MonoBehaviour
 
         public override void Transition()
         {
+            //점프
             if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
                 owner.Jump();
                 ChangeState(State.Jump);
             }
+            //달리기
             else if (Input.GetKeyUp(KeyCode.S)) 
             {
                 ChangeState(State.Run);
@@ -376,6 +403,7 @@ public class Character : MonoBehaviour
 
         public override void Transition()
         {
+            //점프, 슬라이드, 달리기 전환
             if (Input.GetKeyDown(KeyCode.Space) && curJumpCount > 0)
             {
                 owner.Jump();

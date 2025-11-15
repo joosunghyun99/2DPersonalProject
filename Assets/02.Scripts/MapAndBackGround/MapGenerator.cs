@@ -26,6 +26,7 @@ public class MapGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //구성요소 생성해놓기
         PoolManager.Instance.CreatePool(coinPrefab, 30);
         PoolManager.Instance.CreatePool(potionPrefab, 10);
         PoolManager.Instance.CreatePool(starPrefab, 10);
@@ -34,10 +35,11 @@ public class MapGenerator : MonoBehaviour
         PoolManager.Instance.CreatePool(platformPrefab, 80);
         PoolManager.Instance.CreatePool(obstaclePrefab, 30);
 
+        //생성 시작 위치 잡는 용도
         ankerSr = anker.GetComponent<SpriteRenderer>();
         screenRightEdge = Camera.main.ViewportToWorldPoint(new Vector3(1.0f, 0.0f, 0.0f)).x;
 
-        //anker.position = Vector3.zero;
+        
         LoadRandomMap();
     }
 
@@ -53,24 +55,32 @@ public class MapGenerator : MonoBehaviour
 
     void LoadRandomMap()
     {
+        //맵 데이터 가져오기
         TextAsset[] mapFiles = Resources.LoadAll<TextAsset>(mapFolder);
+        //없으면 에러
         if (mapFiles.Length == 0)
         {
             Debug.LogError("No CSV files/" + mapFolder);
             return;
         }
 
+        //랜덤으로 뽑기
         int randomIndex = Random.Range(0, mapFiles.Length);
         TextAsset selectedMap = mapFiles[randomIndex];
 
+        //선택된 맵 생성
         GenerateMap(selectedMap.text);
     }
 
     void GenerateMap(string csvText)
     {
+        //줄바꿈으로 나누기
         string[] lines = csvText.Split('\n');
+
+        //생성 기준점 잡기
         nextSpawnPosition = new Vector3(anker.position.x + tileSize, anker.position.y + (lines.Length-1) * tileSize, anker.position.z);
         
+
         for (int y = 0; y < lines.Length; y++)
         {
             string[] cells = lines[y].Trim().Split(',');
@@ -84,7 +94,7 @@ public class MapGenerator : MonoBehaviour
                 Vector3 position = nextSpawnPosition + new Vector3(x * tileSize, -y * tileSize, 0);
 
                 anker.position = position;
-                //Debug.Log(anker.position);
+               
 
                 switch (cell)
                 {

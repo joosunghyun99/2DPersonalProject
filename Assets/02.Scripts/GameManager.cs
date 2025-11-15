@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
     public void GameStart() 
     {
         score = 0;
-        UIManager.Instance.StartGame();
+        if(SoundManager.Instance != null)
         SoundManager.Instance.BGMOnOff(1);
     }
 

@@ -219,7 +219,9 @@ public class UIManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "GameScene")
         {
             gameSceneUI.SetActive(true);
-            GameManager.Instance.GameStart();
+            if (GameManager.Instance != null)
+                GameManager.Instance.GameStart();
+            UpdateScore(0);
         }
         else
         {

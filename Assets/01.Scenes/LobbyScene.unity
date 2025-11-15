@@ -131,14 +131,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 458994707682966442, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 458994707682966442, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 706054552544099274, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -171,46 +163,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 435904405193669048}
-    - target: {fileID: 2713047307351622314, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2713047307351622314, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2713047307351622314, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 756991339}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ExitGame
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UIManager, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 2757004813220970852, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
     - target: {fileID: 2982910152787663497, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -235,14 +187,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 435904405193669048}
+    - target: {fileID: 4895325644200058357, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5409970461978648389, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 435904405193669048}
-    - target: {fileID: 5876182308150370643, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6713820938051319022, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -331,26 +283,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 435904405193669048}
-    - target: {fileID: 7519839125191417791, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7519839125191417791, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8127919049359605299, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8127919049359605299, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8127919049359605299, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8571415449370542769, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -360,17 +292,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
---- !u!114 &756991339 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9099472767392895435, guid: f4e38ce95149fe549b9bc5f12f6f856a, type: 3}
-  m_PrefabInstance: {fileID: 756991338}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64e049c8394bc2b4b86a3479d1a482c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1067339927
 GameObject:
   m_ObjectHideFlags: 0
